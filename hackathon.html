@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Bharat Civic Companion</title>
+  <style>
+    body {
+  font-family: 'Arial', sans-serif;
+  background: #f5f9ff;
+  margin: 0;
+  padding: 0;
+  color: #222;
+}
+
+header {
+  background: #003366;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  border-bottom: 4px solid #ffcc00;
+}
+
+nav {
+  background: #0055a5;
+  padding: 10px;
+  text-align: center;
+}
+nav a {
+  color: white;
+  margin: 0 15px;
+  text-decoration: none;
+  font-weight: bold;
+}
+nav a:hover {
+  text-decoration: underline;
+}
+
+main {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+section {
+  margin: 20px 0;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+section h2 {
+  margin-bottom: 15px;
+  color: #003366;
+  border-bottom: 2px solid #ffcc00;
+  padding-bottom: 5px;
+}
+
+input[type="text"] {
+  padding: 8px;
+  width: 70%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+button {
+  background: #0055a5;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 5px;
+  font-size: 0.9rem;
+}
+button:hover {
+  background: #003366;
+}
+
+#answer {
+  background: #eef5ff;
+  border: 1px solid #ccc;
+  padding: 15px;
+  margin-top: 10px;
+  text-align: left;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+.service-card {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  margin: 10px;
+  text-align: left;
+}
+
+.service-card h3 {
+  margin: 0 0 8px;
+  color: #0055a5;
+}
+
+.service-card ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+#complaintList li {
+  margin: 8px 0;
+  padding: 8;
+}
+    </style>
+</head>
+<body>
+  <header>
+    <h1>🇮🇳 Smart Bharat Civic Companion</h1>
+    <p>AI-powered help for citizens</p>
+  </header>
+
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Services</a>
+    <a href="#">Complaints</a>
+    <a href="#">Help</a>
+  </nav>
+
+  <main>
+    <!-- Citizen Query Assistant -->
+    <section>
+      <h2>Ask a Question</h2>
+      <input type="text" id="query" placeholder="e.g. How to apply for voter ID?">
+      <button onclick="getAnswer()">Ask AI</button>
+      <div id="answer"></div>
+    </section>
+
+    <!-- Services Directory -->
+    <section>
+      <h2>Government Services (Required Documents)</h2>
+      <div id="services"></div>
+    </section>
+
+    <!-- Complaint Tracker -->
+    <section>
+      <h2>Report an Issue</h2>
+      <input type="text" id="complaint" placeholder="Describe your issue">
+      <button onclick="addComplaint()">Submit</button>
+      <h3>My Complaints</h3>
+      <ul id="complaintList"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Made for Hackathon 2026</p>
+  </footer>
+
+  <script>
+    // Steps for AI answers
+const steps = {
+  voter: `📌 Voter ID Application:
+1. Visit NVSP portal.
+2. Fill Form 6 online.
+3. Upload proof of age and residence.
+4. Submit and track using reference ID.
+✅ Processing: 2–3 weeks.`,
+
+  aadhaar: `📌 Aadhaar Enrollment:
+1. Visit UIDAI enrollment center.
+2. Fill form and provide biometrics.
+3. Carry proof of identity and address.
+✅ Delivered in 2–3 weeks.`,
+
+  passport: `📌 Passport Application:
+1. Register on Passport Seva Portal.
+2. Fill form, pay fee, book appointment.
+3. Attend PSK and police verification.
+✅ Dispatched within 30 days.`,
+
+  pan: `📌 PAN Card Application:
+1. Apply via NSDL/UTIITSL.
+2. Fill Form 49A.
+3. Upload documents and pay fee.
+✅ Delivered in 15 working days.`,
+
+  ration: `📌 Ration Card Application:
+1. Visit State Food & Civil Supplies portal.
+2. Fill form with family details.
+3. Upload residence proof and Aadhaar.
+✅ Processing: 2–4 weeks.`,
+
+  driving: `📌 Driving License Application:
+1. Apply for Learner’s License on Sarathi portal.
+2. Book test slot at RTO.
+3. Apply for Permanent License after 30 days.
+✅ Issued after practical test.`,
+
+  pension: `📌 Pension Scheme:
+1. Visit State Social Welfare portal.
+2. Fill pension form.
+3. Upload Aadhaar, age proof, bank details.
+✅ Benefits credited monthly.`
+};
+
+// Required documents for services
+const documents = {
+  voter: ["Proof of Age (Birth Certificate, School Certificate)", "Proof of Residence (Utility Bill, Aadhaar, Ration Card)"],
+  aadhaar: ["Proof of Identity (PAN, Passport, Driving License)", "Proof of Address (Electricity Bill, Bank Statement)"],
+  passport: ["Proof of DOB (Birth Certificate)", "Identity Proof (PAN, Aadhaar, Driving License)", "Address Proof (Utility Bill, Bank Statement)"],
+  pan: ["Proof of Identity", "Proof of Address", "Proof of Date of Birth"],
+  ration: ["Proof of Residence", "Aadhaar of family members"],
+  driving: ["Age Proof (Birth Certificate, School Certificate)", "Identity Proof (PAN, Aadhaar)"],
+  pension: ["Aadhaar Card", "Age Proof", "Bank Account Details"]
+};
+
+// --- AI Answer Function ---
+function getAnswer() {
+  const q = document.getElementById("query").value.toLowerCase();
+  let response = null;
+
+  for (let key in steps) {
+    if (q.includes(key)) {
+      response = steps[key];
+      break;
+    }
+  }
+
+  document.getElementById("answer").innerText = response ||
+    "⚠️ AI is still learning. Please ask about Voter ID, Aadhaar, Passport, PAN, Ration Card, Driving License, or Pension.";
+}
+
+// --- Services Directory ---
+function loadServices() {
+  const container = document.getElementById("services");
+  container.innerHTML = "";
+  for (let key in documents) {
+    const div = document.createElement("div");
+    div.className = "service-card";
+    div.innerHTML = `<h3>${key.toUpperCase()}</h3><ul>${documents[key].map(doc => `<li>${doc}</li>`).join("")}</ul>`;
+    container.appendChild(div);
+  }
+}
+
+// --- Complaint Tracker ---
+function addComplaint() {
+  const c = document.getElementById("complaint").value.trim();
+  if (!c) return;
+  let complaints = JSON.parse(localStorage.getItem("complaints")) || [];
+  complaints.push({text: c, status: "Pending"});
+  localStorage.setItem("complaints", JSON.stringify(complaints));
+  document.getElementById("complaint").value = "";
+  showComplaints();
+}
+
+function showComplaints() {
+  const list = document.getElementById("complaintList");
+  list.innerHTML = "";
+  let complaints = JSON.parse(localStorage.getItem("complaints")) || [];
+  complaints.forEach((c, index) => {
+    const li = document.createElement("li");
+    li.innerHTML = `${c.text} - ${c.status} 
+      <button onclick="resolveComplaint(${index})">Mark Resolved</button>`;
+    list.appendChild(li);
+  });
+}
+
+function resolveComplaint(index) {
+  let complaints = JSON.parse(localStorage.getItem("complaints")) || [];
+  complaints[index].status = "Resolved ✅";
+  localStorage.setItem("complaints", JSON.stringify(complaints));
+  showComplaints();
+}
+
+// --- Initialize ---
+window.onload = () => {
+  loadServices();
+  showComplaints();
+};
+
+  </script>
+</body>
+</html>
